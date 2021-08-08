@@ -1,0 +1,63 @@
+﻿@page "/persons-list"
+@using ContactsWebApp.Shared
+@inject HttpClient _http
+@inject NavigationManager _navManager
+
+<h1>Person's List</h1>
+
+<p>List of all persons.</p>
+
+@if (naturalPersons == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Contact ID</th>
+                <th>Name</th>
+                <th>CPF</th>
+                <th>Gender</th>
+                <th>Birthday</th>
+                <th>Address</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var naturalPerson in naturalPersons)
+            {
+                <tr>
+                    <td>@naturalPerson.ContactId</td>
+                    <td>@naturalPerson.Name</td>
+                    <td>@naturalPerson.Cpf</td>
+                    <td>@naturalPerson.Gender</td>
+                    <td>@naturalPerson.BirthDate.ToString("dd/MM")</td>
+                    <td>
+                        @naturalPerson.Address.AddressLine1 - @naturalPerson.Address.AddressLine2,  @naturalPerson.Address.City - @naturalPerson.Address.ZipCode - @naturalPerson.Address.Country
+                    </td>
+                    <td>
+                        <button class="btn btn-primary" style="background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);"
+                                @onclick="() => GoEdit(naturalPerson.ContactId)">Edit
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private NaturalPerson[] naturalPersons;
+
+    protected override async Task OnInitializedAsync()
+    {
+        naturalPersons = await _http.GetFromJsonAsync<NaturalPerson[]>("natural-persons/all");
+    }
+
+    protected void GoEdit(int contactId)
+    {
+        _navManager.NavigateTo($"/person/{contactId}");
+    }
+}

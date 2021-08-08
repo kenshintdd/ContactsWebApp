@@ -1,0 +1,62 @@
+﻿@page "/companies-list"
+@using ContactsWebApp.Shared
+@inject HttpClient _http
+@inject NavigationManager _navManager
+
+<h1>Company's List</h1>
+
+<p>List of all companies.</p>
+
+@if (legalPersons == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Company Name</th>
+                <th>Trade Name</th>
+                <th>CNPJ</th>
+                <th>Address</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var legalPerson in legalPersons)
+            {
+                <tr>
+                    <td>@legalPerson.ContactId</td>
+                    <td>@legalPerson.CompanyName</td>
+                    <td>@legalPerson.TradeName</td>
+                    <td>@legalPerson.Cnpj</td>
+                    <td>
+                        @legalPerson.Address.AddressLine1 - @legalPerson.Address.AddressLine2,  @legalPerson.Address.City - @legalPerson.Address.ZipCode - @legalPerson.Address.Country
+                    </td>
+                    <td>
+                        <button class="btn btn-primary" style="background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);"
+                                @onclick="() => GoEdit(legalPerson.ContactId)">
+                            Edit
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private LegalPerson[] legalPersons;
+
+    protected override async Task OnInitializedAsync()
+    {
+        legalPersons = await _http.GetFromJsonAsync<LegalPerson[]>("legal-persons/all");
+    }
+
+    protected void GoEdit(int contactId)
+    {
+        _navManager.NavigateTo($"/company/{contactId}");
+    }
+}

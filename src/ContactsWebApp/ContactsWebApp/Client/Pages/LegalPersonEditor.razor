@@ -1,0 +1,163 @@
+﻿@page "/company/{contactId}"
+@using ContactsWebApp.Shared
+@inject HttpClient _http
+
+<h1>Company's Registration</h1>
+<hr />
+@if (LegalPerson == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <EditForm Model="@LegalPerson" OnValidSubmit="@HandleSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <h3>Company Details</h3>
+        <table class="table">
+            <tr>
+                <td class="col-sm-2 col-form-label">
+                    <label>Company Name*</label>
+                </td>
+                <td class="col-md">
+                    <label>
+                        <InputText @bind-Value="LegalPerson.CompanyName" />
+                    </label>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>CNPJ*</label>
+                </td>
+                <td>
+                    <label>
+                        <InputText @bind-Value="LegalPerson.Cnpj" />
+                    </label>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>Trade Name</label>
+                </td>
+                <td>
+                    <label>
+                        <InputText @bind-Value="LegalPerson.TradeName" />
+                    </label>
+                </td>
+            </tr>
+        </table>
+
+        <h3>Address</h3>
+
+        <table class="table">
+            <tr>
+                <td class="col-sm-2 col-form-label">
+                    <label>Address Line 1</label>
+                </td>
+                <td class="col-md">
+                    <label>
+                        <InputText @bind-Value="LegalPerson.Address.AddressLine1" />
+                    </label>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-sm-2 col-form-label">
+                    <label>Address Line 2</label>
+                </td>
+                <td class="col-sm">
+                    <label>
+                        <InputText @bind-Value="LegalPerson.Address.AddressLine2" />
+                    </label>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-sm-2 col-form-label">
+                    <label>City</label>
+                </td>
+                <td class="col-sm-12">
+                    <label>
+                        <InputText @bind-Value="LegalPerson.Address.City" />
+                    </label>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-sm-2 col-form-label">
+                    <label>State</label>
+                </td>
+                <td class="col-sm-12">
+                    <label>
+                        <InputText @bind-Value="LegalPerson.Address.State" />
+                    </label>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-sm-2 col-form-label">
+                    <label>Zip Code</label>
+                </td>
+                <td class="col-sm-12">
+                    <label>
+                        <InputText @bind-Value="LegalPerson.Address.ZipCode" />
+                    </label>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-sm-2 col-form-label">
+                    <label>Country</label>
+                </td>
+                <td class="col-sm-12">
+                    <label>
+                        <InputText @bind-Value="LegalPerson.Address.Country" />
+                    </label>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" style="text-align: center">
+                    @if (isRegistrationSuccessful)
+                    {
+                        <p style="color: green; font-weight: bold">Company saved successfully</p>
+                    }
+                    else
+                    {
+                        <button type="submit" style="width: 100px; background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);" 
+                                class="btn btn-primary">Save</button>
+                    }
+                </td>
+            </tr>
+        </table>
+    </EditForm>
+}
+
+@code {
+
+    [Parameter]
+    public string ContactId { get; set; }
+
+    [Parameter]
+    public LegalPerson LegalPerson { get; set; }
+
+    private bool isRegistrationSuccessful;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (!string.IsNullOrEmpty(ContactId) && !ContactId.Equals("0"))
+            LegalPerson = await _http.GetFromJsonAsync<LegalPerson>($"legal-persons/{ContactId}");
+        else
+            LegalPerson = new LegalPerson();
+    }
+
+    private async Task HandleSubmit()
+    {
+        HttpResponseMessage result;
+
+        if (string.IsNullOrEmpty(ContactId) || ContactId.Equals("0"))
+            result = await _http.PostAsJsonAsync("legal-persons", LegalPerson);
+        else
+            result = await _http.PutAsJsonAsync("legal-persons", LegalPerson);
+
+        if (result.IsSuccessStatusCode)
+        {
+            isRegistrationSuccessful = true;
+        }
+    }
+}
